@@ -1,6 +1,10 @@
-package desktopSharing;
+package server;
 
 import java.net.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,10 +18,16 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
+import javax.sql.ConnectionPoolDataSource;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
 
 public class DisplayAndVoipServer extends Thread {
 
@@ -25,6 +35,10 @@ public class DisplayAndVoipServer extends Thread {
 	// ServerSocket admin=null;
 	ServerSocket MyService = null;
 	ServerSocket fileService = null;
+	String year = null;
+	String branch = null;
+	String labname=null;
+	JTextArea ta=null;
 
 	Vector<ClientThread> clientList = new Vector<ClientThread>();
 	static Vector<String> ipList = new Vector<String>();
@@ -32,11 +46,12 @@ public class DisplayAndVoipServer extends Thread {
 
 	public DisplayAndVoipServer(long interval) throws Exception {
 		ss = new ServerSocket(2020);
-		MyService = new ServerSocket(500);
-		fileService = new ServerSocket(90);
+		MyService = new ServerSocket(1200);
+		fileService = new ServerSocket(1300);
 
 		sleepInterval = interval;
 		this.setPriority(MIN_PRIORITY);
+		
 		startServer();
 	}
 
@@ -44,8 +59,9 @@ public class DisplayAndVoipServer extends Thread {
 		Socket client = null;
 		Socket voip = null;
 		Socket file = null;
+		createGUI();
 		System.out.println("Server listening for client");
-
+		
 		while (true) {
 			try {
 
@@ -67,6 +83,144 @@ public class DisplayAndVoipServer extends Thread {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	private void createGUI() {
+		
+		JFrame fr=new JFrame("Server");
+		fr.setSize(400, 400);
+		fr.setLayout(new GridBagLayout());
+		Dimension d = fr.getToolkit().getScreenSize();
+		fr.setLocation(d.width / 2 - fr.getSize().width / 2, d.height / 2 - fr.getSize().height / 2);
+		fr.setVisible(true);
+		GridBagConstraints gbc = new GridBagConstraints();
+		
+		JLabel lyear = new JLabel("Year");
+		gbc.gridx = 0;
+		gbc.gridy = 2;
+		gbc.insets = new Insets(20, 0, 0, 0);
+		fr.add(lyear, gbc);
+
+		JComboBox<String> tyear = new JComboBox<String>();
+		tyear.addItem("--Select--");
+		tyear.addItem("First");
+		tyear.addItem("Second");
+		tyear.addItem("Third");
+		tyear.addItem("Final");
+		tyear.setPreferredSize(new Dimension(100, 20));
+		gbc.gridx = 1;
+		gbc.gridy = 2;
+		gbc.insets = new Insets(20, 10, 0, 0);
+		fr.add(tyear, gbc);
+
+		JLabel lbranch = new JLabel("Branch");
+		gbc.gridx = 0;
+		gbc.gridy = 3;
+		gbc.insets = new Insets(20, 0, 0, 0);
+		fr.add(lbranch, gbc);
+
+		JComboBox<String> tbranch = new JComboBox<String>();
+		tbranch.addItem("--Select--");
+		tbranch.addItem("CSE B.Tech");
+		tbranch.addItem("CSE Dual Degree");
+		tbranch.addItem("CSE IIIT");
+		tbranch.addItem("ECE");
+		tbranch.addItem("EEE");
+		tbranch.addItem("Civil");
+		tbranch.addItem("Mechanical");
+		tbranch.setPreferredSize(new Dimension(100, 20));
+		gbc.gridx = 1;
+		gbc.gridy = 3;
+		gbc.insets = new Insets(20, 10, 0, 0);
+		fr.add(tbranch, gbc);
+
+		JLabel llab = new JLabel("Lab Name");
+		gbc.gridx = 0;
+		gbc.gridy = 4;
+		gbc.insets = new Insets(20, 0, 0, 0);
+		fr.add(llab, gbc);
+
+		JComboBox<String> tlab = new JComboBox<String>();
+		tlab.addItem("--Select--");
+		tlab.addItem("DataWarehouse and Data Mining");
+		tlab.addItem("Mobile Computing");
+		tlab.setPreferredSize(new Dimension(150, 20));
+		gbc.gridx = 1;
+		gbc.gridy = 4;
+		gbc.insets = new Insets(20, 10, 0, 0);
+		fr.add(tlab, gbc);
+		
+		JButton submit = new JButton("Submit");
+		gbc.gridx = 0;
+		gbc.gridy = 6;
+		gbc.insets = new Insets(50, 120, 0, 0);
+		fr.add(submit, gbc);
+		JFrame fr1=new JFrame("Users Connected");
+		submit.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				try {
+					 year = (String) tyear.getSelectedItem();
+					 branch = (String) tbranch.getSelectedItem();
+					 labname = (String) tlab.getSelectedItem();
+					updateData(year,branch,labname);
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				fr.dispose();
+				fr1.setVisible(true);
+
+			}
+
+			private void updateData(String year, String branch, String labname) throws SQLException {
+				
+				Connection con=connectDatabase();
+				PreparedStatement ps=con.prepareStatement("update `"+year+"_"+branch+"_"+labname+"` set Total_No_of_Labs="
+						+ "Total_No_of_Labs+1;");
+				
+				int i=ps.executeUpdate();
+				
+				
+			}
+
+		});
+		
+		/***************************************************************************/
+		
+		
+		fr1.setSize(500, 500);
+		fr1.setLocation(d.width / 2 - fr.getSize().width / 2, d.height / 2 - fr.getSize().height / 2);
+		
+		
+	    ta=new JTextArea();
+		ta.setSize(500, 500);
+		ta.setEditable(false);
+		JScrollPane scroll=new JScrollPane(ta);
+		scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		fr1.add(scroll);
+		
+		
+	}
+	
+	public Connection connectDatabase() {
+		
+		Connection con=null;
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			con=DriverManager.getConnection("jdbc:mysql://localhost:3306/LabAttendance?useSSL=false","root","mysql@123");
+			
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return con;
 	}
 
 	public void removeMe(Socket s) {
@@ -100,7 +254,7 @@ public class DisplayAndVoipServer extends Thread {
 
 			dis = new DataInputStream(file.getInputStream());
 			String filename = dis.readUTF();
-			fos = new FileOutputStream(filename);
+			fos = new FileOutputStream("C:\\Users\\hp\\Documents\\Program Submission\\"+year+"\\"+branch+"\\"+labname+"\\"+filename);
 
 		}
 
@@ -128,7 +282,7 @@ public class DisplayAndVoipServer extends Thread {
 	class ClientThread extends Thread {
 		Socket client = null;
 		ObjectOutputStream os = null;
-		InputStream is = null;
+		DataInputStream dis = null;
 
 		public ClientThread(Socket ct) {
 			client = ct;
@@ -136,14 +290,34 @@ public class DisplayAndVoipServer extends Thread {
 			try {
 
 				os = new ObjectOutputStream(ct.getOutputStream());
-				is = ct.getInputStream();
+				dis = new DataInputStream(ct.getInputStream());
+				String rollno=dis.readUTF();
+				updateData(rollno,year,branch,labname);
 				ipList.add(ct.getInetAddress().getHostAddress());
-				System.out.println("Client from " + ct.getInetAddress().getHostAddress() + " connected");
+				ta.append("Roll No.:"+rollno+" from " + ct.getInetAddress().getHostAddress() + " connected\n");
 
 			} catch (Exception e) {
 
 				e.printStackTrace();
 			}
+		}
+
+		private void updateData(String rollno, String year, String branch, String labname) {
+			
+			
+			try {
+				
+				Connection con= connectDatabase();
+				PreparedStatement ps=con.prepareStatement("update `"+year+"_"+branch+"_"+labname+"` set No_of_Lab_Attended="
+						+ "No_of_Lab_Attended+1 where RollNo='"+rollno+"';");
+				
+				int i=ps.executeUpdate();
+				
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		}
 
 		public void run() {
@@ -190,7 +364,7 @@ public class DisplayAndVoipServer extends Thread {
 
 			try {
 				os.close();
-				is.close();
+				dis.close();
 				client.close();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -216,6 +390,12 @@ public class DisplayAndVoipServer extends Thread {
 			clientSocket = client;
 
 			try {
+				
+//				System.out.println(""+mixerInfo.length);
+//				for(int i=0;i<mixerInfo.length;i++)
+//				{
+//					System.out.println(mixerInfo[i]);
+//				}
 				Mixer mixer_ = AudioSystem.getMixer(mixerInfo[1]); // Select Available Hardware Devices for the speaker,
 																	// for my Notebook it is number 1
 				audioFormat = getAudioFormat();

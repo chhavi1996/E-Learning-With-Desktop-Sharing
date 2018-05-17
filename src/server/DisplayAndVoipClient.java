@@ -1,4 +1,4 @@
-package desktopSharing;
+package server;
 
 import java.awt.image.*;
 
@@ -10,15 +10,6 @@ import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
 import javax.swing.*;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 
 import java.io.*;
 import java.net.*;
@@ -42,7 +33,6 @@ public class DisplayAndVoipClient extends Thread implements KeyListener, MouseLi
 	public DisplayAndVoipClient() {
 		try {
 
-			// rollno=JOptionPane.showInputDialog(null,"Enter your Roll No.","");
 			add = JOptionPane.showInputDialog(null, "Server Address", "127.0.0.1");
 			// System.out.println(""+add);
 			s = new Socket(add, 2020);
@@ -55,6 +45,7 @@ public class DisplayAndVoipClient extends Thread implements KeyListener, MouseLi
 
 			Dimension d = fr.getToolkit().getScreenSize();
 			fr.setSize(300 * d.width / d.height, 300);
+			fr.setLocation(d.width / 2 - fr.getSize().width / 2, d.height / 2 - fr.getSize().height / 2);
 			fr.addKeyListener(this);
 			win.addMouseListener(this);
 			// fr.setVisible(true);
@@ -144,6 +135,16 @@ public class DisplayAndVoipClient extends Thread implements KeyListener, MouseLi
 		captureScreen = false;
 	}
 
+	public void sendData(String rollno) throws IOException {
+
+		DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+		dos.writeUTF(rollno);
+//		dos.writeUTF(year);
+//		dos.writeUTF(branch);
+//		dos.writeUTF(labname);
+
+	}
+
 	public static void main(String arg[]) throws IOException {
 
 		JFrame fr1 = new JFrame("Login");
@@ -157,114 +158,124 @@ public class DisplayAndVoipClient extends Thread implements KeyListener, MouseLi
 		GridBagConstraints gbc = new GridBagConstraints();
 
 		JLabel lname = new JLabel("Name");
-		gbc.gridx=0;
-		gbc.gridy=0;
+		gbc.gridx = 0;
+		gbc.gridy = 0;
 		fr1.add(lname, gbc);
-		
+
 		JTextField tname = new JTextField();
-		gbc.gridx=1;
-		gbc.gridy=0;
-		gbc.insets=new Insets(0, 10, 0, 0);
+		gbc.gridx = 1;
+		gbc.gridy = 0;
+		gbc.insets = new Insets(0, 10, 0, 0);
 		tname.setPreferredSize(new Dimension(100, 20));
 		fr1.add(tname, gbc);
-		
+
 		JLabel lroll = new JLabel("RollNo");
-		gbc.gridx=0;
-		gbc.gridy=1;
-		gbc.insets=new Insets(20,0, 0, 0);
+		gbc.gridx = 0;
+		gbc.gridy = 1;
+		gbc.insets = new Insets(20, 0, 0, 0);
 		fr1.add(lroll, gbc);
-		
+
 		JTextField troll = new JTextField();
 		troll.setPreferredSize(new Dimension(100, 20));
-		gbc.gridx=1;
-		gbc.gridy=1;
-		gbc.insets=new Insets(20, 10, 0, 0);
-		fr1.add(troll,gbc);
+		gbc.gridx = 1;
+		gbc.gridy = 1;
+		gbc.insets = new Insets(20, 10, 0, 0);
+		fr1.add(troll, gbc);
+
+//		JLabel lyear = new JLabel("Year");
+//		gbc.gridx = 0;
+//		gbc.gridy = 2;
+//		gbc.insets = new Insets(20, 0, 0, 0);
+//		fr1.add(lyear, gbc);
+
+//		JComboBox<String> tyear = new JComboBox<String>();
+//		tyear.addItem("--Select--");
+//		tyear.addItem("First");
+//		tyear.addItem("Second");
+//		tyear.addItem("Third");
+//		tyear.addItem("Final");
+//		tyear.setPreferredSize(new Dimension(100, 20));
+//		gbc.gridx = 1;
+//		gbc.gridy = 2;
+//		gbc.insets = new Insets(20, 10, 0, 0);
+//		fr1.add(tyear, gbc);
+//
+//		JLabel lbranch = new JLabel("Branch");
+//		gbc.gridx = 0;
+//		gbc.gridy = 3;
+//		gbc.insets = new Insets(20, 0, 0, 0);
+//		fr1.add(lbranch, gbc);
+//
+//		JComboBox<String> tbranch = new JComboBox<String>();
+//		tbranch.addItem("--Select--");
+//		tbranch.addItem("CSE B.Tech");
+//		tbranch.addItem("CSE Dual Degree");
+//		tbranch.addItem("CSE IIIT");
+//		tbranch.addItem("ECE");
+//		tbranch.addItem("EEE");
+//		tbranch.addItem("Civil");
+//		tbranch.addItem("Mechanical");
+//		tbranch.setPreferredSize(new Dimension(100, 20));
+//		gbc.gridx = 1;
+//		gbc.gridy = 3;
+//		gbc.insets = new Insets(20, 10, 0, 0);
+//		fr1.add(tbranch, gbc);
+//
+//		JLabel llab = new JLabel("Lab Name");
+//		gbc.gridx = 0;
+//		gbc.gridy = 4;
+//		gbc.insets = new Insets(20, 0, 0, 0);
+//		fr1.add(llab, gbc);
+//
+//		JComboBox<String> tlab = new JComboBox<String>();
+//		tlab.addItem("--Select--");
+//		tlab.addItem("DataWarehouse and Data Mining");
+//		tlab.addItem("Mobile Computing");
+//		tlab.setPreferredSize(new Dimension(150, 20));
+//		gbc.gridx = 1;
+//		gbc.gridy = 4;
+//		gbc.insets = new Insets(20, 10, 0, 0);
+//		fr1.add(tlab, gbc);
+
+		JButton submit = new JButton("Submit");
+		gbc.gridx = 0;
+		gbc.gridy = 6;
+		gbc.insets = new Insets(50, 120, 0, 0);
+		fr1.add(submit, gbc);
+
 		
-		JLabel lyear = new JLabel("Year");
-		gbc.gridx=0;
-		gbc.gridy=2;
-		gbc.insets=new Insets(20,0, 0, 0);
-		fr1.add(lyear, gbc);
-		
-		JComboBox<String> tyear = new JComboBox<String>();
-		tyear.addItem("--Select--");
-		tyear.addItem("First");
-		tyear.addItem("Second");
-		tyear.addItem("Third");
-		tyear.addItem("Final");
-		tyear.setPreferredSize(new Dimension(100, 20));
-		gbc.gridx=1;
-		gbc.gridy=2;
-		gbc.insets=new Insets(20, 10, 0, 0);
-		fr1.add(tyear,gbc);
-		
-		JLabel lbranch = new JLabel("Branch");
-		gbc.gridx=0;
-		gbc.gridy=3;
-		gbc.insets=new Insets(20,0, 0, 0);
-		fr1.add(lbranch, gbc);
-		
-		JComboBox<String> tbranch = new JComboBox<String>();
-		tbranch.addItem("--Select--");
-		tbranch.addItem("CSE B.Tech");
-		tbranch.addItem("CSE Dual Degree");
-		tbranch.addItem("CSE IIIT");
-		tbranch.addItem("ECE");
-		tbranch.addItem("EEE");
-		tbranch.addItem("Civil");
-		tbranch.addItem("Mechanical");
-		tbranch.setPreferredSize(new Dimension(100, 20));
-		gbc.gridx=1;
-		gbc.gridy=3;
-		gbc.insets=new Insets(20, 10, 0, 0);
-		fr1.add(tbranch,gbc);
-		 
-		JLabel llab = new JLabel("Lab Name");
-		gbc.gridx=0;
-		gbc.gridy=4;
-		gbc.insets=new Insets(20,0, 0, 0);
-		fr1.add(llab, gbc);
-		
-		JComboBox<String> tlab = new JComboBox<String>();
-		tlab.setPreferredSize(new Dimension(100, 20));
-		gbc.gridx=1;
-		gbc.gridy=4;
-		gbc.insets=new Insets(20, 10, 0, 0);
-		fr1.add(tlab,gbc);
 
 		DisplayAndVoipClient tx = new DisplayAndVoipClient();
-		 DisplayAndVoipClient.VoipClient vc = tx.new VoipClient();
+		DisplayAndVoipClient.VoipClient vc = tx.new VoipClient();
+
 		JFrame fr = new JFrame("Desktop Sharing App");
 		fr.setSize(500, 500);
 		fr.setLayout(new GridBagLayout());
+		fr.setLocation(dim.width / 2 - fr1.getSize().width / 2, dim.height / 2 - fr1.getSize().height / 2);
 		fr.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		fr.getContentPane().setBackground(Color.BLACK);
-
-//		gbc.gridwidth = GridBagConstraints.REMAINDER;
-//		gbc.fill = GridBagConstraints.HORIZONTAL;
+		
+		GridBagConstraints gbc1 = new GridBagConstraints();
+		gbc1.gridwidth = GridBagConstraints.REMAINDER;
+		gbc1.fill = GridBagConstraints.HORIZONTAL;
+		gbc1.insets = new Insets(10, 0, 0, 0);
 
 		JButton b1 = new JButton("Share Screen");
-		gbc.insets = new Insets(10, 0, 0, 0);
-		fr.add(b1, gbc);
+		fr.add(b1, gbc1);
 
 		JButton b4 = new JButton("Stop Screen Sharing");
-		gbc.insets = new Insets(10, 0, 0, 0);
-		fr.add(b4, gbc);
+		fr.add(b4, gbc1);
 
 		JButton b2 = new JButton("Open Gateway for Voice");
-		gbc.insets = new Insets(10, 0, 0, 0);
-		fr.add(b2, gbc);
+		fr.add(b2, gbc1);
 
 		JButton b5 = new JButton("Close Gateway for Voice");
-		gbc.insets = new Insets(10, 0, 0, 0);
-		fr.add(b5, gbc);
+		fr.add(b5, gbc1);
 
 		JButton b3 = new JButton("Submit Program");
-		gbc.insets = new Insets(10, 0, 0, 0);
-		fr.add(b3, gbc);
+		fr.add(b3, gbc1);
 
-		fr.setVisible(true);
+		//fr.setVisible(true);
 
 		b1.addActionListener(new ActionListener() {
 
@@ -327,6 +338,28 @@ public class DisplayAndVoipClient extends Thread implements KeyListener, MouseLi
 			}
 		});
 
+		submit.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				try {
+					String rollno = troll.getText();
+//					String year = (String) tyear.getSelectedItem();
+//					String branch = (String) tbranch.getSelectedItem();
+//					String labname = (String) tlab.getSelectedItem();
+					tx.sendData(rollno);
+					fr1.dispose();
+					fr.setVisible(true);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
+			}
+
+		});
+
 	}
 
 	class ProgramSubmit extends Thread {
@@ -338,7 +371,7 @@ public class DisplayAndVoipClient extends Thread implements KeyListener, MouseLi
 		File myfile;
 
 		public ProgramSubmit(File f) throws UnknownHostException, IOException {
-			s = new Socket(add, 90);
+			s = new Socket(add, 1300);
 			myfile = f;
 			dos = new DataOutputStream(s.getOutputStream());
 			fis = new FileInputStream(f.getAbsolutePath());
@@ -377,7 +410,7 @@ public class DisplayAndVoipClient extends Thread implements KeyListener, MouseLi
 		Thread captureThread;
 
 		public VoipClient() throws IOException {
-			sock = new Socket(add, 500);// 1
+			sock = new Socket(add, 1200);// 1
 			out = new BufferedOutputStream(sock.getOutputStream());// 2
 			in = new BufferedInputStream(sock.getInputStream());// 3
 		}
@@ -402,8 +435,16 @@ public class DisplayAndVoipClient extends Thread implements KeyListener, MouseLi
 
 				DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, audioFormat);
 
-				Mixer mixer = AudioSystem.getMixer(mixerInfo[3]); // Select Available Hardware Devices for the micro,
-																	// for my Notebook it is number 3.
+				Mixer mixer = AudioSystem.getMixer(mixerInfo[3]); // Select
+																	// Available
+																	// Hardware
+																	// Devices
+																	// for the
+																	// micro,
+																	// for my
+																	// Notebook
+																	// it is
+																	// number 3.
 
 				targetDataLine = (TargetDataLine) mixer.getLine(dataLineInfo);
 
