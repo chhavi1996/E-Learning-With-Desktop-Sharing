@@ -35,7 +35,7 @@ public class DisplayAndVoipClient extends Thread implements KeyListener, MouseLi
 
 			add = JOptionPane.showInputDialog(null, "Server Address", "127.0.0.1");
 			// System.out.println(""+add);
-			s = new Socket(add, 2020);
+			s = new Socket(add, 7500);
 			os = s.getOutputStream();
 			ois = new ObjectInputStream(s.getInputStream());
 			fr.setTitle("Displaying " + add + ":port 2020");

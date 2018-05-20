@@ -4,6 +4,7 @@ import java.net.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -45,7 +46,7 @@ public class DisplayAndVoipServer extends Thread {
 	long sleepInterval = 125;
 
 	public DisplayAndVoipServer(long interval) throws Exception {
-		ss = new ServerSocket(2020);
+		ss = new ServerSocket(7500);
 		MyService = new ServerSocket(1200);
 		fileService = new ServerSocket(1300);
 
@@ -68,9 +69,10 @@ public class DisplayAndVoipServer extends Thread {
 				client = ss.accept();
 
 				ClientThread ct = new ClientThread(client);
-
+				
 				clientList.addElement(ct);
 				ct.start();
+				
 				voip = MyService.accept();
 				VoipServer vs = new VoipServer(voip);
 				vs.start();
@@ -78,6 +80,7 @@ public class DisplayAndVoipServer extends Thread {
 				file = fileService.accept();
 				FileServer fs = new FileServer(file);
 				fs.start();
+				
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -210,7 +213,7 @@ public class DisplayAndVoipServer extends Thread {
 		Connection con=null;
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
-			con=DriverManager.getConnection("jdbc:mysql://localhost:3306/LabAttendance?useSSL=false","root","mysql@123");
+			con=DriverManager.getConnection("jdbc:mysql://localhost:3306/LabAttendance","root","mysql@123");
 			
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -283,6 +286,7 @@ public class DisplayAndVoipServer extends Thread {
 		Socket client = null;
 		ObjectOutputStream os = null;
 		DataInputStream dis = null;
+		
 
 		public ClientThread(Socket ct) {
 			client = ct;
@@ -292,14 +296,28 @@ public class DisplayAndVoipServer extends Thread {
 				os = new ObjectOutputStream(ct.getOutputStream());
 				dis = new DataInputStream(ct.getInputStream());
 				String rollno=dis.readUTF();
-				updateData(rollno,year,branch,labname);
-				ipList.add(ct.getInetAddress().getHostAddress());
-				ta.append("Roll No.:"+rollno+" from " + ct.getInetAddress().getHostAddress() + " connected\n");
-
+				
+					updateData(rollno,year,branch,labname);
+			
+					ipList.add(ct.getInetAddress().getHostAddress());
+					ta.append("Roll No.:"+rollno+" from " + ct.getInetAddress().getHostAddress() + " connected\n");
+				
 			} catch (Exception e) {
 
 				e.printStackTrace();
 			}
+		}
+
+		private int checkStudent(String rollno, String pass, String year, String branch, String labname) throws SQLException {
+
+			Connection con=connectDatabase();
+			PreparedStatement ps=con.prepareStatement("select * from `"+year+"_"+branch+"_"+labname+"` where RollNo="+rollno+""
+					+ "and Password="+pass+";");
+			
+			ResultSet rs=ps.executeQuery();
+			if(rs.next())
+				return 1;
+			return 0;
 		}
 
 		private void updateData(String rollno, String year, String branch, String labname) {
